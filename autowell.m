@@ -22,7 +22,7 @@ function [] = autowell(foldername,varargin)
 % prefeered folder format: yyyymmdd_IDID but you can choose any
 
 
-%% I/O
+% % I/O
 % possible example inputformats:
 % autowell('20190228_test3')  (runs autowell with one tray)
 % autowell('20190228_test3','nTrays',2)  (runs autowell with two trays)
@@ -41,7 +41,7 @@ function [] = autowell(foldername,varargin)
 % 'names',{'tray1','tray2','tray3','tray4'}(default)
 % 'nTrays', 1(default number of trays, max:4)
 
-%% change log
+% % change log
 % updated July 2019 by Killian Brennan:
 % detect wrong well alignment and notify user
 % manual option for well alignment (manualAlign)
@@ -82,7 +82,7 @@ function [] = autowell(foldername,varargin)
 % addapted from well_compare function by R.O.D Jan 2018
 
 
-%% parameters
+% + magic_args="parameters"
 subsampling = .5; % subsampling factor (rescales image to improve processing time)
 skip = 0; % number of images skipped for analysis
 radiusCorrection = 1; % modulates detected radius before generating mask
@@ -92,6 +92,7 @@ traySize = 96; % number of wells per tray
 default_nTrays = 3; % default number of trays
 default_peak_thresh=0.8; % Automatically set the ice threshold if it is not is provided
 default_calibration = 'off'; % turn calibration on or off
+% -
 
 colors = {'r','g','b','c'}; % plotting colors
 
@@ -101,14 +102,15 @@ auto_available = 0; % flag for logfile output
 intersect = 1.3;
 slope = 0.917;
 
-%% close all open figures
+% + magic_args="close all open figures"
 close all
 
-%% save parent directory
+% + magic_args="save parent directory"
 parentDir = cd;
 
-%% parse imputs
+% + magic_args="parse imputs"
 p = inputParser;
+% -
 
 addRequired(p,'foldername');
 
@@ -140,7 +142,7 @@ manual = p.Results.manual;
 
 nWells = nTrays*traySize; % number of wells being analyzed
 
-%% Identify the well location (read in the first image) and retrieve the well change over the run
+% + magic_args="Identify the well location (read in the first image) and retrieve the well change over the run"
 cd(foldername) % must be in the correct folder or use the whole path here i.e. cd(strcat('D\DropFreezing\BaselTest\',foldername))
 dirstruct = dir('*.jpg'); % find info about .jpg's in folder
 pcrnmAll = char(extractfield(dirstruct,'name')'); % extract name information from structure & transform for correct format & convert to char vector
@@ -252,8 +254,9 @@ for i=1:size(pcrnm,1)
     end
 end
 close(h); % close waitbar
+% -
 
-%% Determine when freezing occured and rank the wells when they froze
+% % Determine when freezing occured and rank the wells when they froze
 % normalize the well change and look for the first change where the value is
 % larger than the peak_thresh of the max change of the well
 
@@ -276,7 +279,7 @@ Frz_time = Frz_name(:,1:end-4);
 
 Scan_time = pcrnm(:,1:end-4);
 
-%% Calculate Frozen Fraction for each time step
+% + magic_args="Calculate Frozen Fraction for each time step"
 nFrz = zeros(size(wells,1),1);
 for iFF = 1:size(wells,1)
     if iFF == 1
@@ -287,7 +290,7 @@ for iFF = 1:size(wells,1)
 end
 
 
-%% Find the temperature data
+% + magic_args="Find the temperature data"
 dirstruc = dir('*.txt');
 tname = dirstruc.name;
 if isempty(tname)
@@ -320,7 +323,8 @@ else
     
     set(gca,'fontsize',12);
     print([foldername,'_frzOrder'],'-dpng','-r300');
-    
+% -
+
 end
 
 % plot simple figures
