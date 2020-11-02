@@ -14,6 +14,8 @@ function [] = FINCrunner(measName,varargin)
 % 'nTrays', 1(default number of trays, max:4) [but only actually use 3]
 
 %% change log
+% updated Nov 2020 by Andrew Loeppky
+
 % updated July 2019 by Killian Brennan:
 % changed triggering of pictures and temperature from time to temperature intervall
 
