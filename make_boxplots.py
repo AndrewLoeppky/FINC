@@ -12,9 +12,12 @@ functions for processing raw output from Freezing Ice Nuclei
 Counter (FINC) and generating plots.
 
 TODO:
-replicate Killian's heatmap of freeze order, frozen fraction 
-curve, create a processing function to produce diff and 
-cumulative freezing temperature curves
+replicate Killian's heatmap of freeze order
+
+modify functions to return plot objects instead of just 
+printing the plots
+
+generate legends with sample names
 ===============================================================
 """
 # %%
@@ -42,19 +45,19 @@ def get_mat(the_file):
 
 
 # %%
-def make_hist(frzdata):
+def make_hist(*frzdata):
     """
     Returns a histogram of freezing events at temp T
 
     WARNING: NOT NORMALIZED TO N(T)!!! Strongly dependent on
     droplet size
     """
-    fig, ax = plt.subplots()
-    ax = plt.hist(frzdata, bins=100)
-    plt.xlabel("Freezing Temperature ($^oC$)")
-    plt.ylabel("Frozen Well Count")
+    for data in frzdata:
+        plt.hist(data, bins=100)
 
-    # return fig
+    plt.xlabel("Freezing Temperature ($^oC$)")
+    plt.ylabel("$N_{wells}$")
+    plt.title("Frozen Well Count as a Function of Temperature")
 
 
 # %%
@@ -69,10 +72,10 @@ def make_boxplot(*data):
         dat = dat.reshape(dat.shape[0])
         all_dat.append(dat)
 
-    fig, ax = plt.subplots()
-    ax = plt.boxplot(all_dat)
+    plt.boxplot(all_dat)
     plt.xlabel("Sample")
     plt.ylabel("Freezing Temp ($^oC$)")
+    plt.title("Freezing Temp Distrubutions")
 
 
 # %%
@@ -83,35 +86,42 @@ def make_ff_curve(data):
     """
     data = np.sort(data, axis=0)
     ind = np.linspace(len(data), 1, len(data)) / len(data)
+
     plt.plot(data, ind)
     plt.xlabel("Temp ($^oC$")
     plt.ylabel("FF")
+    plt.title("Frozen Fraction")
 
 
 # %%
-def make_big_K(data, norm=1, Vwell=10):
+def make_big_K(*data, norm=1, Vwell=10):
     """
     creates a cumulative concentration curve from Vali eq.
 
     default normalization constant (eg surface area) = 1
-    default well volume = 10 (microlitre)
+    default well volume = 10 microlitre
     """
-    # make frozen fraction curve
-    data = np.sort(data, axis=0)
-    ind = np.linspace(len(data), 1, len(data)) / len(data)
+    # make frozen fraction curve and calculate K from it
+    length = len(data[1])
+    ind = np.linspace(length, 1, length) / length
 
-    K = -np.log(1 - ind) / (norm * Vwell * 10 ** -6) # Vali eq. 
+    K = -np.log(1 - ind) / (norm * Vwell * 10 ** -6)  # Vali eq.
 
-    # plot
-    plt.plot(data, K)
-    plt.yscale('log')
-    plt.xlabel('Temp ($^oC$)')
-    plt.ylabel('K(T) ($L^{-1}$)')
+    for dat in data:
+        dat = np.sort(dat, axis=0)
+        plt.plot(dat, K)
+
+    plt.yscale("log")
+    plt.xlabel("Temp ($^oC$)")
+    plt.ylabel("K(T) ($L^{-1}$)")
+    plt.title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
+
+
 # %%
 def main():
     # name of expt runs
     SA1 = "finc_20201007_SA1"
-    SA2 = "finc_20201007_SA2"
+    SA2 = "finc_20201007_SA2"  # this one is bunk!
     SA3 = "finc_20201007_SA3"
     lig = "finc_20201028_lignin2"
 
@@ -121,10 +131,15 @@ def main():
     SA3 = get_mat(SA3)
     lig = get_mat(lig)
 
+    the_data = SA1, SA3, lig
+
     # make some plots
-    make_hist(lig)
-    make_boxplot(SA1, SA2, SA3, lig)
+    # make_hist(*the_data)
+    # make_big_K(*the_data)
+    make_boxplot(*the_data)
 
 
 if __name__ == "__main__":
     main()
+
+# %%
