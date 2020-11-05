@@ -4,9 +4,9 @@ DATA PROCESSING LIBRARY - FINC OUTPUTS
 
 Author: Andrew Loeppky
 UBC/ETH Atmospheric Science, NBD Group
-Last Update Nov 4/2020
+Last Update Nov 5/2020
 
-***Currently under development, dont trust this code yet***
+***Currently under development, don't trust this code yet***
 
 functions for processing raw output from Freezing Ice Nuclei 
 Counter (FINC) and generating plots.
@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
 
-
 # %%
 def get_mat(the_file):
     """
@@ -39,7 +38,6 @@ def get_mat(the_file):
     load_this = the_path + the_file + "/workspace.mat"
     mat = sio.loadmat(load_this)
     frzTall = mat["FrzTall"]
-    # frzTall = np.sort(frzTall, axis=0)
 
     return frzTall
 
@@ -79,16 +77,19 @@ def make_boxplot(*data):
 
 
 # %%
-def make_ff_curve(data):
+def make_ff_curve(*data):
     """
     creates a frozen fraction (FF) curve as a function of
     temperature
     """
-    data = np.sort(data, axis=0)
-    ind = np.linspace(len(data), 1, len(data)) / len(data)
+    length = len(data[1])
+    ind = np.linspace(length, 1, length) / length
 
-    plt.plot(data, ind)
-    plt.xlabel("Temp ($^oC$")
+    for dat in data:
+        dat = np.sort(dat, axis=0)
+        plt.plot(dat, ind)
+
+    plt.xlabel("Temp ($^oC$)")
     plt.ylabel("FF")
     plt.title("Frozen Fraction")
 
@@ -118,25 +119,32 @@ def make_big_K(*data, norm=1, Vwell=10):
 
 
 # %%
+def make_heatmap(frzTall, ntrays=3):
+    """
+    Generate heatmap of freezing temperatures to troubleshoot
+    FINC -- redundant code to MATLAB function in autowell.m
+    (produces identical output)
+    """
+    the_map = frzTall.reshape(6 * ntrays, 16).T
+    plt.imshow(the_map, cmap="seismic")
+    plt.colorbar()
+
+
+# %%
 def main():
     # name of expt runs
-    SA1 = "finc_20201007_SA1"
-    SA2 = "finc_20201007_SA2"  # this one is bunk!
-    SA3 = "finc_20201007_SA3"
-    lig = "finc_20201028_lignin2"
-
-    # get the data from matlab
-    SA1 = get_mat(SA1)
-    SA2 = get_mat(SA2)
-    SA3 = get_mat(SA3)
-    lig = get_mat(lig)
+    SA1 = get_mat("finc_20201007_SA1")
+    SA2 = get_mat("finc_20201007_SA2")  # this one is bunk!
+    SA3 = get_mat("finc_20201007_SA3")
+    lig = get_mat("finc_20201028_lignin2")
 
     the_data = SA1, SA3, lig
 
-    # make some plots
     # make_hist(*the_data)
     # make_big_K(*the_data)
-    make_boxplot(*the_data)
+    # make_boxplot(*the_data)
+    # make_ff_curve(*the_data)
+    make_heatmap(lig)
 
 
 if __name__ == "__main__":
