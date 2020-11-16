@@ -12,8 +12,6 @@ functions for processing raw output from Freezing Ice Nuclei
 Counter (FINC) and generating plots.
 
 TODO:
-replicate Killian's heatmap of freeze order
-
 modify functions to return plot objects instead of just 
 printing the plots
 
@@ -59,22 +57,28 @@ def make_hist(*frzdata):
 
 
 # %%
-def make_boxplot(*data):
+def make_boxplot(data):
     """
     given one or more input freezing vectors, make boxplots of
     freezing temperature
     """
     # splat datasets and create list of 1d lists to for plotting
     all_dat = []
-    for dat in data:
+    labels=[]
+    #print(type(data.values()))
+    for lab in data.keys():
+        labels.append(lab)
+
+    for dat in data.values():
         dat = dat.reshape(dat.shape[0])
         all_dat.append(dat)
+        
 
-    plt.boxplot(all_dat)
+    plt.boxplot(all_dat,labels=labels)
     plt.xlabel("Sample")
     plt.ylabel("Freezing Temp ($^oC$)")
     plt.title("Freezing Temp Distrubutions")
-
+    
 
 # %%
 def make_ff_curve(*data):
@@ -129,22 +133,42 @@ def make_heatmap(frzTall, ntrays=3):
     plt.imshow(the_map, cmap="seismic")
     plt.colorbar()
 
+# %%
+def make_small_k(*data, Tint=1.0):
+    '''
+    Calculates differential freezing spectra, default delta T = 1.0oC
+    See Vali 2018 for calcualtion
+    '''
+
+    return None
+
 
 # %%
 def main():
     # name of expt runs
-    SA1 = get_mat("finc_20201007_SA1")
-    SA2 = get_mat("finc_20201007_SA2")  # this one is bunk!
-    SA3 = get_mat("finc_20201007_SA3")
-    lig = get_mat("finc_20201028_lignin2")
+    '''
+    lig2 = get_mat('finc_20201028_lignin2')
+    lig51 = get_mat('20201106_lignin5-1')
+    lig52 = get_mat('20201106_lignin5-2')
+    lig53 = get_mat('20201106_lignin5-3')
+    lig54 = get_mat('20201106_lignin5-4')
+    lig55 = get_mat('20201106_lignin5-5')
+    '''
 
-    the_data = SA1, SA3, lig
-
+    the_filenames = ['20201111_bubbles', '20201111_nobubbles']
+    the_data = {}
+    for file in the_filenames:
+        # create a dictionary samplename:data 
+        the_data[file[9:]] = get_mat(file)
+        
+    #print(the_data)
+    
+    
     # make_hist(*the_data)
     # make_big_K(*the_data)
-    # make_boxplot(*the_data)
+    make_boxplot(the_data)
     # make_ff_curve(*the_data)
-    make_heatmap(lig)
+    # make_heatmap(lig)
 
 
 if __name__ == "__main__":
