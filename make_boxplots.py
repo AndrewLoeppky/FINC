@@ -4,7 +4,7 @@ DATA PROCESSING LIBRARY - FINC OUTPUTS
 
 Author: Andrew Loeppky
 UBC/ETH Atmospheric Science, NBD Group
-Last Update Nov 5/2020
+Last Update Nov 18/2020
 
 ***Currently under development, don't trust this code yet***
 
@@ -62,23 +62,16 @@ def make_boxplot(data):
     given one or more input freezing vectors, make boxplots of
     freezing temperature
     """
-    # splat datasets and create list of 1d lists to for plotting
-    all_dat = []
-    labels=[]
-    #print(type(data.values()))
-    for lab in data.keys():
-        labels.append(lab)
+    '''
+    for key in data.keys():
+        data[key].reshape(len(data[key]))
+    '''
+    fig, ax = plt.subplots()
+    ax.boxplot(data.values(),showmeans=True)
+    ax.set_xticklabels(data.keys(),rotation=-60)
+    ax.set_ylabel("Freezing Temp ($^oC$)")
+    ax.set_title("Freezing Temp Distrubutions")
 
-    for dat in data.values():
-        dat = dat.reshape(dat.shape[0])
-        all_dat.append(dat)
-        
-
-    plt.boxplot(all_dat,labels=labels)
-    plt.xlabel("Sample")
-    plt.ylabel("Freezing Temp ($^oC$)")
-    plt.title("Freezing Temp Distrubutions")
-    
 
 # %%
 def make_ff_curve(*data):
@@ -133,37 +126,35 @@ def make_heatmap(frzTall, ntrays=3):
     plt.imshow(the_map, cmap="seismic")
     plt.colorbar()
 
+
 # %%
 def make_small_k(*data, Tint=1.0):
-    '''
+    """
     Calculates differential freezing spectra, default delta T = 1.0oC
     See Vali 2018 for calcualtion
-    '''
+    """
 
     return None
 
 
 # %%
 def main():
-    # name of expt runs
-    '''
-    lig2 = get_mat('finc_20201028_lignin2')
-    lig51 = get_mat('20201106_lignin5-1')
-    lig52 = get_mat('20201106_lignin5-2')
-    lig53 = get_mat('20201106_lignin5-3')
-    lig54 = get_mat('20201106_lignin5-4')
-    lig55 = get_mat('20201106_lignin5-5')
-    '''
-
-    the_filenames = ['20201111_bubbles', '20201111_nobubbles']
+    the_filenames = [
+        "20201007_SA1",
+        "20201007_SA2",
+        "20201007_SA3",
+        "20201020_SA2",
+        "20201020_SA3",
+        "20201111_SArepeat-1",
+        "20201117_SA-1",
+        "20201117_SA-2",
+        "20201117_SA-3",
+    ]
     the_data = {}
     for file in the_filenames:
-        # create a dictionary samplename:data 
-        the_data[file[9:]] = get_mat(file)
-        
-    #print(the_data)
-    
-    
+        # create a dictionary samplename:data, reshape vals to 1D nparray
+        the_data[file[4:]] = np.reshape(get_mat(file),len(get_mat(file)))
+
     # make_hist(*the_data)
     # make_big_K(*the_data)
     make_boxplot(the_data)
@@ -173,5 +164,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 # %%
