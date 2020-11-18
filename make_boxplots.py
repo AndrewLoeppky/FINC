@@ -62,24 +62,28 @@ def make_boxplot(data):
     given one or more input freezing vectors, make boxplots of
     freezing temperature
     """
-    '''
+    """
     for key in data.keys():
         data[key].reshape(len(data[key]))
-    '''
+    """
     fig, ax = plt.subplots()
-    ax.boxplot(data.values(),showmeans=True)
-    ax.set_xticklabels(data.keys(),rotation=-60)
+    ax.boxplot(data.values(), showmeans=True)
+    ax.set_xticklabels(data.keys(), rotation=-60)
     ax.set_ylabel("Freezing Temp ($^oC$)")
     ax.set_title("Freezing Temp Distrubutions")
 
 
 # %%
-def make_ff_curve(*data):
+def make_ff_curve(data):
     """
     creates a frozen fraction (FF) curve as a function of
     temperature
     """
-    length = len(data[1])
+    for dat in data.values():
+        dat = np.sort(dat, axis=0)
+    fig, ax = plt.subplots()
+
+    length = len(data.)
     ind = np.linspace(length, 1, length) / length
 
     for dat in data:
@@ -116,15 +120,19 @@ def make_big_K(*data, norm=1, Vwell=10):
 
 
 # %%
-def make_heatmap(frzTall, ntrays=3):
+def make_heatmap(data, ntrays=3):
     """
     Generate heatmap of freezing temperatures to troubleshoot
     FINC -- redundant code to MATLAB function in autowell.m
     (produces identical output)
     """
-    the_map = frzTall.reshape(6 * ntrays, 16).T
-    plt.imshow(the_map, cmap="seismic")
-    plt.colorbar()
+    for key in data.keys():
+        fig, ax = plt.subplots()
+        the_map = data[key].reshape(6 * ntrays, 16).T
+        ax.set_title('FINC Run: ' + key)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        fig.colorbar(ax.imshow(the_map, cmap="seismic"))
 
 
 # %%
@@ -153,13 +161,13 @@ def main():
     the_data = {}
     for file in the_filenames:
         # create a dictionary samplename:data, reshape vals to 1D nparray
-        the_data[file[4:]] = np.reshape(get_mat(file),len(get_mat(file)))
+        the_data[file[4:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # make_hist(*the_data)
     # make_big_K(*the_data)
-    make_boxplot(the_data)
-    # make_ff_curve(*the_data)
-    # make_heatmap(lig)
+    # make_boxplot(the_data)
+    # make_ff_curve(the_data)
+    make_heatmap(the_data)
 
 
 if __name__ == "__main__":
