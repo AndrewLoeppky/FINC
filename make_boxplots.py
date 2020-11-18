@@ -15,7 +15,10 @@ TODO:
 modify functions to return plot objects instead of just 
 printing the plots
 
-generate legends with sample names
+modify the remaining functions to accept the new dictionary 
+format
+
+create a prototype differential concentration plot fcn
 ===============================================================
 """
 # %%
@@ -23,6 +26,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
+import csv
 
 # %%
 def get_mat(the_file):
@@ -39,6 +43,28 @@ def get_mat(the_file):
 
     return frzTall
 
+# %%
+def get_csv(the_file):
+    '''
+    output a freezing temperature dictionary filename:nparray()
+    from a csv. CSVs are assumed to be in the format:
+    
+    metadata, metadata, ...
+    name1,   name2, ...,   nameN
+    frztemp, frztemp, ..., frztemp
+    .
+    .
+    .
+    As per ETH repository entries found at: 
+    https://www.research-collection.ethz.ch/handle/20.500.11850/438875
+    '''
+    reader = csv.DictReader(open(the_file))
+
+    result = {}
+    for row in reader:
+        for column, value in row.items(): 
+            result.setdefault(column, []).append(value)
+    return result
 
 # %%
 def make_hist(*frzdata):
@@ -83,7 +109,7 @@ def make_ff_curve(data):
         dat = np.sort(dat, axis=0)
     fig, ax = plt.subplots()
 
-    length = len(data.)
+    length = len(data)
     ind = np.linspace(length, 1, length) / length
 
     for dat in data:
@@ -149,7 +175,7 @@ def make_small_k(*data, Tint=1.0):
 def main():
     the_filenames = [
         "20201007_SA1",
-        "20201007_SA2",
+        #"20201007_SA2", this one is bunk!
         "20201007_SA3",
         "20201020_SA2",
         "20201020_SA3",
@@ -158,16 +184,17 @@ def main():
         "20201117_SA-2",
         "20201117_SA-3",
     ]
+    
+    # create a dictionary samplename:data, reshape vals to 1D nparray
     the_data = {}
     for file in the_filenames:
-        # create a dictionary samplename:data, reshape vals to 1D nparray
         the_data[file[4:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # make_hist(*the_data)
     # make_big_K(*the_data)
-    # make_boxplot(the_data)
+    make_boxplot(the_data)
     # make_ff_curve(the_data)
-    make_heatmap(the_data)
+    # make_heatmap(the_data)
 
 
 if __name__ == "__main__":
