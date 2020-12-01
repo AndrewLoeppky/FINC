@@ -74,13 +74,15 @@ def get_csv(the_file):
 
 
 # %%
-def make_hist(*frzdata):
+def make_hist(data):
     """
     Returns a histogram of freezing events at temp T
 
     WARNING: NOT NORMALIZED TO N(T)!!! Strongly dependent on
     droplet size
     """
+
+    
     for data in frzdata:
         plt.hist(data, bins=100)
 
@@ -120,12 +122,6 @@ def make_ff_curve(data):
         dat = np.sort(data[key], axis=0)
         ax.plot(dat,ind,label=key)
 
-    '''
-
-    for dat in data:
-        dat = np.sort(dat, axis=0)
-        plt.plot(dat, ind)
-    '''
     ax.legend()
     ax.set_xlabel("Temp ($^oC$)")
     ax.set_ylabel("FF")
@@ -133,7 +129,7 @@ def make_ff_curve(data):
 
 
 # %%
-def make_big_K(*data, norm=1, Vwell=10):
+def make_big_K(data, norm=1, Vwell=10):
     """
     creates a cumulative concentration curve from Vali eq.
 
@@ -141,6 +137,23 @@ def make_big_K(*data, norm=1, Vwell=10):
     default well volume = 10 microlitre
     """
     # make frozen fraction curve and calculate K from it
+    fig, ax = plt.subplots()
+    
+    for key in data.keys():
+        length = len(data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(data[key], axis=0)
+
+        K = -np.log(1-ind)  / (norm * Vwell * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat,K,label=key)
+
+    ax.legend()
+    ax.set_yscale('log')
+    ax.set_xlabel("Temp ($^oC$)")
+    ax.set_ylabel("K(T) ($L^{-1}$)")
+    ax.set_title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
+    
+    '''
     length = len(data[1])
     ind = np.linspace(length, 1, length) / length
 
@@ -154,7 +167,7 @@ def make_big_K(*data, norm=1, Vwell=10):
     plt.xlabel("Temp ($^oC$)")
     plt.ylabel("K(T) ($L^{-1}$)")
     plt.title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
-
+    '''
 
 # %%
 def make_heatmap(data, ntrays=3):
@@ -201,8 +214,8 @@ def main():
         the_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # make_hist(*the_data)
-    # make_big_K(*the_data)
-    make_boxplot(the_data)
+    make_big_K(the_data)
+    # make_boxplot(the_data)
     # make_ff_curve(the_data)
     # make_heatmap(the_data)
 
