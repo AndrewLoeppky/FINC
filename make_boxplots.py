@@ -43,28 +43,35 @@ def get_mat(the_file):
 
     return frzTall
 
+
 # %%
 def get_csv(the_file):
-    '''
-    output a freezing temperature dictionary filename:nparray()
+    """
+    output a freezing temperature dictionary exptname:nparray()
     from a csv. CSVs are assumed to be in the format:
-    
-    metadata, metadata, ...
-    name1,   name2, ...,   nameN
-    frztemp, frztemp, ..., frztemp
-    .
-    .
-    .
-    As per ETH repository entries found at: 
-    https://www.research-collection.ethz.ch/handle/20.500.11850/438875
-    '''
-    reader = csv.DictReader(open(the_file))
 
+    metadata1, ..., metadata2, ...
+    name1,     name2, ...,   nameN
+    frztemp,   frztemp, ..., frztemp
+    .
+    .
+    .
+    As per ETH repository entries found at:
+    https://www.research-collection.ethz.ch/handle/20.500.11850/438875
+    """
+    reader = csv.reader(open(the_file))
+    print(reader)
+    """
     result = {}
     for row in reader:
-        for column, value in row.items(): 
-            result.setdefault(column, []).append(value)
+        key = row[1]
+        if key in result:
+            # implement your duplicate row handling here
+            pass
+        result[key] = row[1:]
     return result
+    """
+
 
 # %%
 def make_hist(*frzdata):
@@ -93,7 +100,7 @@ def make_boxplot(data):
         data[key].reshape(len(data[key]))
     """
     fig, ax = plt.subplots()
-    ax.boxplot(data.values(), showmeans=True)
+    ax.boxplot(data.values(), showmeans=True,whis=[10,90])
     ax.set_xticklabels(data.keys(), rotation=-60)
     ax.set_ylabel("Freezing Temp ($^oC$)")
     ax.set_title("Freezing Temp Distrubutions")
@@ -105,20 +112,24 @@ def make_ff_curve(data):
     creates a frozen fraction (FF) curve as a function of
     temperature
     """
-    for dat in data.values():
-        dat = np.sort(dat, axis=0)
     fig, ax = plt.subplots()
+    
+    for key in data.keys():
+        length = len(data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(data[key], axis=0)
+        ax.plot(dat,ind,label=key)
 
-    length = len(data)
-    ind = np.linspace(length, 1, length) / length
+    '''
 
     for dat in data:
         dat = np.sort(dat, axis=0)
         plt.plot(dat, ind)
-
-    plt.xlabel("Temp ($^oC$)")
-    plt.ylabel("FF")
-    plt.title("Frozen Fraction")
+    '''
+    ax.legend()
+    ax.set_xlabel("Temp ($^oC$)")
+    ax.set_ylabel("FF")
+    ax.set_title("Frozen Fraction")
 
 
 # %%
@@ -155,7 +166,7 @@ def make_heatmap(data, ntrays=3):
     for key in data.keys():
         fig, ax = plt.subplots()
         the_map = data[key].reshape(6 * ntrays, 16).T
-        ax.set_title('FINC Run: ' + key)
+        ax.set_title("FINC Run: " + key)
         ax.set_xticks([])
         ax.set_yticks([])
         fig.colorbar(ax.imshow(the_map, cmap="seismic"))
@@ -174,21 +185,20 @@ def make_small_k(*data, Tint=1.0):
 # %%
 def main():
     the_filenames = [
-        "20201007_SA1",
-        #"20201007_SA2", this one is bunk!
-        "20201007_SA3",
-        "20201020_SA2",
-        "20201020_SA3",
-        "20201111_SArepeat-1",
-        "20201117_SA-1",
-        "20201117_SA-2",
-        "20201117_SA-3",
+        "20201125_SA-1",
+        "20201125_SA-2",
+        "20201125_SA-3",
+        "20201125_SA-4",
+        "20201125_SA-5",
+        "20201125_SA-6",
+        "20201125_SA-7",
+        "20201125_SA-8",
     ]
-    
+
     # create a dictionary samplename:data, reshape vals to 1D nparray
     the_data = {}
     for file in the_filenames:
-        the_data[file[4:]] = np.reshape(get_mat(file), len(get_mat(file)))
+        the_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # make_hist(*the_data)
     # make_big_K(*the_data)
