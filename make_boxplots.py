@@ -4,7 +4,7 @@ DATA PROCESSING LIBRARY - FINC OUTPUTS
 
 Author: Andrew Loeppky
 UBC/ETH Atmospheric Science, NBD Group
-Last Update Nov 18/2020
+Last Update Dec 1/2020
 
 ***Currently under development, don't trust this code yet***
 
@@ -44,9 +44,12 @@ def get_mat(the_file):
     return frzTall
 
 
+
 # %%
 def get_csv(the_file):
     """
+    NOT WORKING ATM
+
     output a freezing temperature dictionary exptname:nparray()
     from a csv. CSVs are assumed to be in the format:
 
@@ -76,19 +79,20 @@ def get_csv(the_file):
 # %%
 def make_hist(data):
     """
-    Returns a histogram of freezing events at temp T
+    Returns a histogram of freezing events at temp T given a dictionary
+    of samplename:([freezetemp1,freezetemp2, etc])
 
     WARNING: NOT NORMALIZED TO N(T)!!! Strongly dependent on
     droplet size
     """
+    fig, ax = plt.subplots()
+    for key in data.keys():
+        ax.hist(data[key], bins=40, label=key, alpha=0.6)
 
-    
-    for data in frzdata:
-        plt.hist(data, bins=100)
-
-    plt.xlabel("Freezing Temperature ($^oC$)")
-    plt.ylabel("$N_{wells}$")
-    plt.title("Frozen Well Count as a Function of Temperature")
+    ax.legend()
+    ax.set_ylabel("Freezing Temp ($^oC$)")
+    ax.set_title("Freezing Temp Distrubutions")
+    ax.set_ylabel("$N_{wells}$")
 
 
 # %%
@@ -97,12 +101,8 @@ def make_boxplot(data):
     given one or more input freezing vectors, make boxplots of
     freezing temperature
     """
-    """
-    for key in data.keys():
-        data[key].reshape(len(data[key]))
-    """
     fig, ax = plt.subplots()
-    ax.boxplot(data.values(), showmeans=True,whis=[10,90])
+    ax.boxplot(data.values(), showmeans=True, whis=[10, 90])
     ax.set_xticklabels(data.keys(), rotation=-60)
     ax.set_ylabel("Freezing Temp ($^oC$)")
     ax.set_title("Freezing Temp Distrubutions")
@@ -115,12 +115,12 @@ def make_ff_curve(data):
     temperature
     """
     fig, ax = plt.subplots()
-    
+
     for key in data.keys():
         length = len(data[key])
         ind = np.linspace(length, 1, length) / length
         dat = np.sort(data[key], axis=0)
-        ax.plot(dat,ind,label=key)
+        ax.plot(dat, ind, label=key)
 
     ax.legend()
     ax.set_xlabel("Temp ($^oC$)")
@@ -138,36 +138,21 @@ def make_big_K(data, norm=1, Vwell=10):
     """
     # make frozen fraction curve and calculate K from it
     fig, ax = plt.subplots()
-    
+
     for key in data.keys():
         length = len(data[key])
         ind = np.linspace(length, 1, length) / length
         dat = np.sort(data[key], axis=0)
 
-        K = -np.log(1-ind)  / (norm * Vwell * 10 ** -6)  # Vali 2018 eq. 4
-        ax.plot(dat,K,label=key)
+        K = -np.log(1 - ind) / (norm * Vwell * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat, K, label=key)
 
     ax.legend()
     ax.set_yscale('log')
     ax.set_xlabel("Temp ($^oC$)")
     ax.set_ylabel("K(T) ($L^{-1}$)")
     ax.set_title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
-    
-    '''
-    length = len(data[1])
-    ind = np.linspace(length, 1, length) / length
 
-    K = -np.log(1 - ind) / (norm * Vwell * 10 ** -6)  # Vali eq.
-
-    for dat in data:
-        dat = np.sort(dat, axis=0)
-        plt.plot(dat, K)
-
-    plt.yscale("log")
-    plt.xlabel("Temp ($^oC$)")
-    plt.ylabel("K(T) ($L^{-1}$)")
-    plt.title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
-    '''
 
 # %%
 def make_heatmap(data, ntrays=3):
@@ -186,26 +171,50 @@ def make_heatmap(data, ntrays=3):
 
 
 # %%
-def make_small_k(*data, Tint=1.0):
+def make_small_k(data, Tint=1.0, norm=1, Vwell=10):
     """
     Calculates differential freezing spectra, default delta T = 1.0oC
     See Vali 2018 for calcualtion
-    """
 
-    return None
+    defaults: normalization constant = 1
+              well volume = 10 microliter
+              temperature interval = 1oC
+    """
+    fig, ax = plt.subplots()
+
+    for key in data.keys():
+        length = len(data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(data[key], axis=0)
+
+        mintemp = round(min(data[key]))  # create a temp array with Tint spacing
+        maxtemp = round(max(data[key]))
+        temps = np.arange(mintemp, maxtemp, Tint)
+
+        def big_k(ind):
+            big_k = -np.log(1 - ind) / (norm * Vwell * 10 ** -6)  # Vali 2018 eq. 4
+            return big_k
+
+        lil_k = np.empty_like(temps)
+        for T in temps:
+            print(key + " " + str(T))
+            # lil_k[i] = (big_k(i)-big_k(i-1)) / Tint # Vali 2018 eq. 14, forward difference
+
+        # ax.plot(dat,lil_k,label=key)
+
+    ax.legend()
+    ax.set_yscale("log")
+    ax.set_xlabel("Temp ($^oC$)")
+    ax.set_ylabel("K(T) ($L^{-1}$)")
+    ax.set_title(f"Differential Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
 
 
 # %%
 def main():
     the_filenames = [
-        "20201125_SA-1",
-        "20201125_SA-2",
-        "20201125_SA-3",
-        "20201125_SA-4",
-        "20201125_SA-5",
-        "20201125_SA-6",
-        "20201125_SA-7",
-        "20201125_SA-8",
+        "20201028_lignin2",
+        "20201106_lignin3",
+        #"20201106_lignin4",
     ]
 
     # create a dictionary samplename:data, reshape vals to 1D nparray
@@ -213,8 +222,38 @@ def main():
     for file in the_filenames:
         the_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
-    # make_hist(*the_data)
-    make_big_K(the_data)
+    
+
+    # freestyle code to get lignin data ===========================================
+    annas_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/anna.mat"
+    mat = sio.loadmat(annas_data)
+    for key in mat.keys():
+        if str(key)[0] == 'F':
+            the_data[key] = mat[key]
+
+
+
+    jons_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/jon.mat"
+    mat = sio.loadmat(jons_data)
+    for key in mat.keys():
+        if str(key)[0] == 'A':
+            the_data[key] = mat[key]
+        elif str(key)[0] == 'S':
+            the_data[key] = mat[key]
+        
+    
+    sophies_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/sophie.mat"
+    mat = sio.loadmat(sophies_data)
+    for key in mat.keys():
+        for i in range(8):
+            if str(key) ==  str('lignin_sophie' + str(i)):
+                the_data[key] = mat[key]
+
+
+    # ==============================================================================
+    make_hist(the_data)
+    # make_big_K(the_data)
+    # make_small_k(the_data)
     # make_boxplot(the_data)
     # make_ff_curve(the_data)
     # make_heatmap(the_data)
