@@ -22,7 +22,6 @@ create a prototype differential concentration plot fcn
 ===============================================================
 """
 # %%
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
@@ -114,7 +113,7 @@ def make_ff_curve(data):
     creates a frozen fraction (FF) curve as a function of
     temperature
     """
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(15,5))
 
     for key in data.keys():
         length = len(data[key])
@@ -252,10 +251,10 @@ def main():
 
     # ==============================================================================
     make_hist(the_data)
-    # make_big_K(the_data)
+    make_big_K(the_data)
     # make_small_k(the_data)
     # make_boxplot(the_data)
-    # make_ff_curve(the_data)
+    make_ff_curve(the_data)
     # make_heatmap(the_data)
 
 
