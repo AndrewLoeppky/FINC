@@ -8,7 +8,6 @@
 # NBD Group, ETH Zurich, Dec 11/2020
 #
 # Make sure to change default temp controller format .XLS to .txt
-# My favorite format for most data is dictionaries full of np arrays
 #
 # ============================================================
 
@@ -37,7 +36,7 @@ def get_finc_ramp(file_path):
     Input: ramp.txt from FINCrunner.m
     specify absolute file path
 
-    Out: dictionary containing datetime and lauda temp
+    Out: time, temp as nparrays
     """
     finc_time = np.empty(count_lines(file_path), dtype="datetime64[us]")
     finc_temp = np.empty(count_lines(file_path))
@@ -58,11 +57,7 @@ def get_finc_ramp(file_path):
             # omit metadata lines
             pass
 
-    # create and return the dictionary full of np arrays
-    out_dict = {}
-    out_dict["finc_time"] = finc_time
-    out_dict["finc_temp"] = finc_temp
-    return out_dict
+    return finc_time, finc_temp
 
 
 def get_tc_ramp(file_path):
@@ -70,16 +65,27 @@ def get_tc_ramp(file_path):
     Input: Save temp controller file as .txt (tab delimited) and change
     nothing else. Specify absolute path to where file is saved.
 
-    Output: 12 thermocouple time series and a datetime list
-    as a dictionary.
+    Output: datetime nparray, 12 thermocouple time series and a as a dictionary.
     """
 
-    tc_time = np.empty(count_lines(file_path), dtype="datetime64[us]")
-    tc1 = np.empty(count_lines(file_path))
-    tc2 = np.empty_like(tc1)
-    i = 0
-    omitted_lines = 0
+    # initialize time and thermocouple temps
+    tc_time = np.zeros(count_lines(file_path), dtype="datetime64[us]")
+    tc1 = np.zeros(count_lines(file_path))
+    tc2 = np.zeros_like(tc1)
+    tc3 = np.zeros_like(tc1)
+    tc4 = np.zeros_like(tc1)
+    tc5 = np.zeros_like(tc1)
+    tc6 = np.zeros_like(tc1)
+    tc7 = np.zeros_like(tc1)
+    tc8 = np.zeros_like(tc1)
+    tc9 = np.zeros_like(tc1)
+    tc10 = np.zeros_like(tc1)
+    tc11 = np.zeros_like(tc1)
+    tc12 = np.zeros_like(tc1)
 
+    print(len(tc_time))
+
+    i = 0
     for line in open(file_path):
         # get the time
         try:
@@ -87,30 +93,57 @@ def get_tc_ramp(file_path):
             raw_date = the_str[1] + " " + the_str[2]
             dt = datetime.datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S")
             tc_time[i] = np.datetime64(dt)
-            print(tc_time[i])
+
             # get 12 thermocouple temperatures
-            tc1[i] = the_str[3]
-            tc2[i] = the_str[4]
+            tc1[i] = float(the_str[3])
+            tc2[i] = float(the_str[5])
+            tc3[i] = float(the_str[7])
+            tc4[i] = float(the_str[9])
+            tc5[i] = float(the_str[11])
+            tc6[i] = float(the_str[13])
+            tc7[i] = float(the_str[15])
+            tc8[i] = float(the_str[17])
+            tc9[i] = float(the_str[19])
+            tc10[i] = float(the_str[21])
+            tc11[i] = float(the_str[23])
+            tc12[i] = float(the_str[25])
+
             i += 1
-        
+
         except ValueError:
             # omit lines containing metadata
-            omitted_lines += 1
+            pass
 
-    print(f'Omitted {omitted_lines} lines')
-
-    
-        
+    # package results in dictionary
+    tc_dict = {
+        "tc1": tc1,
+        "tc2": tc2,
+        "tc3": tc3,
+        "tc4": tc4,
+        "tc5": tc5,
+        "tc6": tc6,
+        "tc7": tc7,
+        "tc8": tc8,
+        "tc9": tc9,
+        "tc10": tc10,
+        "tc11": tc11,
+        "tc12": tc12,
+    }
+    return tc_time, tc_dict
 
 
 # finc data
 finc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/ramp.txt"
 # thermocouple data
-tc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/TMB01001.csv"
+tc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/TMB01001_fixed.csv"
 
-get_tc_ramp(tc_ramp_path)
+finc_time, finc_temp = get_finc_ramp(finc_ramp_path)
+cal_time, cal_temp = get_tc_ramp(tc_ramp_path)
 
-# a = get_finc_ramp(finc_ramp_path)
+print(cal_time)
+#plt.plot(finc_time, finc_temp)
+#for key in cal_temp:
+#    plt.plot(cal_time, cal_temp[key], label=key)
 
 
 # %%
