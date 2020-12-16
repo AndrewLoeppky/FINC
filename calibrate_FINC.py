@@ -7,7 +7,7 @@
 # Author: Andrew Loeppky
 # NBD Group, ETH Zurich, Dec 11/2020
 #
-# Make sure to change default temp controller format .XLS to .txt
+# Make sure to change default temp controller format .XLS to .csv
 #
 # ============================================================
 
@@ -62,7 +62,7 @@ def get_finc_ramp(file_path):
 
 def get_tc_ramp(file_path):
     """
-    Input: Save temp controller file as .txt (tab delimited) and change
+    Input: Save temp controller file as .csv and change
     nothing else. Specify absolute path to where file is saved.
 
     Output: datetime nparray, 12 thermocouple time series and a as a dictionary.
@@ -131,19 +131,24 @@ def get_tc_ramp(file_path):
     }
     return tc_time, tc_dict
 
+# this will become main()
+# ====================================================================================
 
 # finc data
 finc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/ramp.txt"
 # thermocouple data
 tc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/TMB01001_fixed.csv"
 
+
+'''
 finc_time, finc_temp = get_finc_ramp(finc_ramp_path)
 cal_time, cal_temp = get_tc_ramp(tc_ramp_path)
 
 print(cal_time)
-#plt.plot(finc_time, finc_temp)
-#for key in cal_temp:
-#    plt.plot(cal_time, cal_temp[key], label=key)
-
+plt.plot(finc_time, finc_temp, label='lauda')
+for key in cal_temp:
+    plt.plot(cal_time, cal_temp[key], label=key)
+plt.legend()
+'''
 
 # %%
