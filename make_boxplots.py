@@ -150,7 +150,7 @@ def make_big_K(data, norm=1, Vwell=10, title=""):
     ax.legend()
     ax.set_yscale("log")
     ax.set_xlabel("Temp ($^oC$)")
-    ax.set_ylabel("K(T) ($L^{-1}$)")
+    ax.set_ylabel("K(T) ($/mgC$)")
     ax.set_title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)" + title)
 
 
@@ -209,6 +209,18 @@ def make_small_k(data, Tint=1.0, norm=1, Vwell=10):
     ax.set_title(f"Differential Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
 
 
+def carbon_per_well(conc, wellvol):
+    """
+    input: TOC of sample (mgC/L)
+           wellvol in uL
+
+    output: total organic carbon in each well for
+            use as normalization const
+    """
+    cpw = conc * wellvol * 1e-6
+    return cpw
+
+
 # %%
 def main():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -221,20 +233,31 @@ def main():
         "20201215_lignin5uL-3",
         "20201215_lignin5uL-4",
         "20201215_lignin5uL-5",
-        "20201215_SA5uL-2",
     ]
 
     andrews_data = {}
     for file in andrews_files:
         andrews_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
+    andrew_conc = 20  # mgC/L
+    andrew_vol = 5  # uL
+    andrew_norm = carbon_per_well(andrew_conc, andrew_vol)
+
+    # quick n dirty calibration from finc SOP
+    for key in andrews_data.keys():
+        andrews_data[key] = 0.72 + 0.96 * andrews_data[key]
+
     # Anna ================================================================
-    anna = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/anna.mat"
+    anna = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/anna3.mat"
     mat = sio.loadmat(anna)
     annas_data = {}
     for key in mat.keys():
-        if str(key)[0] == "F":
+        if str(key)[0] == "a":
             annas_data[key] = mat[key]
+
+    anna_conc = 20  # mgC/L
+    anna_vol = 5  # uL
+    anna_norm = carbon_per_well(anna_conc, anna_vol)
 
     # Jon ===============================================================
     jon = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/jon.mat"
@@ -246,6 +269,10 @@ def main():
         elif str(key)[0] == "S":
             jons_data[key] = mat[key]
 
+    jon_conc = 200  # mgC/L
+    jon_vol = 10  # uL
+    jon_norm = carbon_per_well(jon_conc, jon_vol)
+
     # Sophie ======================================================
     sophie = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/sophie.mat"
     sophies_data = {}
@@ -255,6 +282,10 @@ def main():
             if str(key) == str("lignin_sophie" + str(i)):
                 sophies_data[key] = mat[key]
 
+    sophie_conc = 20  # mgC/L
+    sophie_vol = 20  # uL
+    sophie_norm = carbon_per_well(sophie_conc, sophie_vol)
+
     # ==============================================================================
     # make_hist(the_data)
     # make_big_K(the_data)
@@ -263,12 +294,60 @@ def main():
     # make_ff_curve(the_data)
     # make_heatmap(the_data)
 
-    #make_ff_curve(jons_data, title=" - jon")
-    #make_ff_curve(annas_data, title=" - anna")
-    #make_ff_curve(sophies_data, title=" - sophie")
-    #make_ff_curve(andrews_data, title=" - andrew")
+    # make_ff_curve(jons_data, title=" - jon")
+    # make_ff_curve(annas_data, title=" - anna")
+    # make_ff_curve(sophies_data, title=" - sophie")
+    # make_ff_curve(andrews_data, title=" - andrew")
 
-    make_big_K(andrews_data, norm=0.0001,Vwell=5,title=' - andrew')
+    # make_big_K(andrews_data, norm=andrew_norm, Vwell=andrew_vol, title=" - andrew")
+    # make_big_K(jons_data, norm=jon_norm, Vwell=jon_vol, title=" - jon")
+    # make_big_K(sophies_data, norm=sophie_norm, Vwell=sophie_vol, title=' - sophie')
+
+    # make megaplot
+    fig, ax = plt.subplots(figsize=(15, 10))
+
+    
+    # anna
+    for key in annas_data.keys():
+        length = len(annas_data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(annas_data[key], axis=0)
+
+        K = -np.log(1 - ind) / (anna_norm * anna_vol * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat, K, label=key)
+    
+    # andrew
+    for key in andrews_data.keys():
+        length = len(andrews_data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(andrews_data[key], axis=0)
+
+        K = -np.log(1 - ind) / (andrew_norm * andrew_vol * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat, K, label=key)
+
+    # jon
+    for key in jons_data.keys():
+        length = len(jons_data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(jons_data[key], axis=0)
+
+        K = -np.log(1 - ind) / (jon_norm * jon_vol * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat, K, label=key)
+
+    # sophie
+    for key in sophies_data.keys():
+        length = len(sophies_data[key])
+        ind = np.linspace(length, 1, length) / length
+        dat = np.sort(sophies_data[key], axis=0)
+
+        K = -np.log(1 - ind) / (sophie_norm * sophie_vol * 10 ** -6)  # Vali 2018 eq. 4
+        ax.plot(dat, K, label=key)
+
+    ax.legend()
+    ax.set_yscale("log")
+    ax.set_xlabel("Temp ($^oC$)")
+    ax.set_ylabel("K(T) ($/mgC$)")
+    ax.set_title("$n_m$ plot")
 
 
 if __name__ == "__main__":
