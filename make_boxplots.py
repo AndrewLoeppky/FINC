@@ -126,6 +126,8 @@ def make_ff_curve(data):
     ax.set_ylabel("FF")
     ax.set_title("Frozen Fraction")
 
+    return ax
+
 
 # %%
 def make_big_K(data, norm=1, Vwell=10):
@@ -209,52 +211,58 @@ def make_small_k(data, Tint=1.0, norm=1, Vwell=10):
 
 
 # %%
-def main():
-    the_filenames = [
+def main():  
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # freestyle code to get lignin data
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
+
+    # Andrew ==============================================================
+    andrews_files = [
         "20201028_lignin2",
         "20201106_lignin3",
         #"20201106_lignin4",
     ]
+    andrews_data = {}
+    for file in andrews_data:
+        andrews_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
-    # create a dictionary samplename:data, reshape vals to 1D nparray
-    the_data = {}
-    for file in the_filenames:
-        the_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
-
-    
-
-    # freestyle code to get lignin data ===========================================
-    annas_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/anna.mat"
-    mat = sio.loadmat(annas_data)
+    # Anna ================================================================
+    anna = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/anna.mat"
+    mat = sio.loadmat(anna)
+    annas_data = {}
     for key in mat.keys():
         if str(key)[0] == 'F':
-            the_data[key] = mat[key]
+            annas_data[key] = mat[key]
 
 
-
-    jons_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/jon.mat"
-    mat = sio.loadmat(jons_data)
+    # Jon ===============================================================
+    jon = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/jon.mat"
+    jons_data = {}
+    mat = sio.loadmat(jon)
     for key in mat.keys():
         if str(key)[0] == 'A':
-            the_data[key] = mat[key]
+            jons_data[key] = mat[key]
         elif str(key)[0] == 'S':
-            the_data[key] = mat[key]
+            jons_data[key] = mat[key]
         
-    
-    sophies_data = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/sophie.mat"
-    mat = sio.loadmat(sophies_data)
+    # Sophie ======================================================
+    sophie = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/sophie.mat"
+    sophies_data = {}
+    mat = sio.loadmat(sophie)
     for key in mat.keys():
         for i in range(8):
             if str(key) ==  str('lignin_sophie' + str(i)):
-                the_data[key] = mat[key]
+                sophies_data[key] = mat[key]
 
 
     # ==============================================================================
-    make_hist(the_data)
-    make_big_K(the_data)
+    # make_hist(the_data)
+    # make_big_K(the_data)
     # make_small_k(the_data)
     # make_boxplot(the_data)
-    make_ff_curve(the_data)
+    ax1 = make_ff_curve(jons_data)
+    ax2 = make_ff_curve(annas_data)
     # make_heatmap(the_data)
 
 
