@@ -198,14 +198,12 @@ def make_small_k(*data, Tint=1.0):
 # %%
 def main():
     the_filenames = [
-        "20201125_SA-1",
-        "20201125_SA-2",
-        "20201125_SA-3",
-        "20201125_SA-4",
-        "20201125_SA-5",
-        "20201125_SA-6",
-        "20201125_SA-7",
-        "20201125_SA-8",
+        "20201216_lig_dilution_4mg",
+        "20201216_lig_dilution_20mg",
+        "20201216_lig_dilution_40mg",
+        "20201216_lig_dilution_100mg",
+        "20201216_lig_dilution_189mg",
+        "20201215_SA5uL-2"
     ]
 
     # create a dictionary samplename:data, reshape vals to 1D nparray
@@ -214,9 +212,9 @@ def main():
         the_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # make_hist(*the_data)
-    make_big_K(the_data)
+    make_big_K(the_data, Vwell=5)
     # make_boxplot(the_data)
-    # make_ff_curve(the_data)
+    make_ff_curve(the_data)
     # make_heatmap(the_data)
 
 
