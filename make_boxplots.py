@@ -43,7 +43,6 @@ def get_mat(the_file):
     return frzTall
 
 
-
 # %%
 def get_csv(the_file):
     """
@@ -108,12 +107,12 @@ def make_boxplot(data):
 
 
 # %%
-def make_ff_curve(data):
+def make_ff_curve(data, title=""):
     """
     creates a frozen fraction (FF) curve as a function of
     temperature
     """
-    fig, ax = plt.subplots(figsize=(15,5))
+    fig, ax = plt.subplots(figsize=(15, 5))
 
     for key in data.keys():
         length = len(data[key])
@@ -124,17 +123,17 @@ def make_ff_curve(data):
     ax.legend()
     ax.set_xlabel("Temp ($^oC$)")
     ax.set_ylabel("FF")
-    ax.set_title("Frozen Fraction")
+    ax.set_title("Frozen Fraction" + title)
 
     return ax
 
 
 # %%
-def make_big_K(data, norm=1, Vwell=10):
+def make_big_K(data, norm=1, Vwell=10, title=""):
     """
     creates a cumulative concentration curve from Vali eq.
 
-    default normalization constant (eg surface area) = 1
+    default normalization constant (eg surface area, TOC) = 1
     default well volume = 10 microlitre
     """
     # make frozen fraction curve and calculate K from it
@@ -149,10 +148,10 @@ def make_big_K(data, norm=1, Vwell=10):
         ax.plot(dat, K, label=key)
 
     ax.legend()
-    ax.set_yscale('log')
+    ax.set_yscale("log")
     ax.set_xlabel("Temp ($^oC$)")
     ax.set_ylabel("K(T) ($L^{-1}$)")
-    ax.set_title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)")
+    ax.set_title(f"Cumulative Freezing Spectra ({Vwell}$\mu L$ droplet vol)" + title)
 
 
 # %%
@@ -211,20 +210,22 @@ def make_small_k(data, Tint=1.0, norm=1, Vwell=10):
 
 
 # %%
-def main():  
+def main():
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # freestyle code to get lignin data
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    
 
     # Andrew ==============================================================
     andrews_files = [
-        "20201028_lignin2",
-        "20201106_lignin3",
-        #"20201106_lignin4",
+        "20201215_lignin5uL-2",
+        "20201215_lignin5uL-3",
+        "20201215_lignin5uL-4",
+        "20201215_lignin5uL-5",
+        "20201215_SA5uL-2",
     ]
+
     andrews_data = {}
-    for file in andrews_data:
+    for file in andrews_files:
         andrews_data[file[9:]] = np.reshape(get_mat(file), len(get_mat(file)))
 
     # Anna ================================================================
@@ -232,38 +233,42 @@ def main():
     mat = sio.loadmat(anna)
     annas_data = {}
     for key in mat.keys():
-        if str(key)[0] == 'F':
+        if str(key)[0] == "F":
             annas_data[key] = mat[key]
-
 
     # Jon ===============================================================
     jon = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/jon.mat"
     jons_data = {}
     mat = sio.loadmat(jon)
     for key in mat.keys():
-        if str(key)[0] == 'A':
+        if str(key)[0] == "A":
             jons_data[key] = mat[key]
-        elif str(key)[0] == 'S':
+        elif str(key)[0] == "S":
             jons_data[key] = mat[key]
-        
+
     # Sophie ======================================================
     sophie = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201202_lignin_datadump/sophie.mat"
     sophies_data = {}
     mat = sio.loadmat(sophie)
     for key in mat.keys():
         for i in range(8):
-            if str(key) ==  str('lignin_sophie' + str(i)):
+            if str(key) == str("lignin_sophie" + str(i)):
                 sophies_data[key] = mat[key]
-
 
     # ==============================================================================
     # make_hist(the_data)
     # make_big_K(the_data)
     # make_small_k(the_data)
     # make_boxplot(the_data)
-    ax1 = make_ff_curve(jons_data)
-    ax2 = make_ff_curve(annas_data)
+    # make_ff_curve(the_data)
     # make_heatmap(the_data)
+
+    #make_ff_curve(jons_data, title=" - jon")
+    #make_ff_curve(annas_data, title=" - anna")
+    #make_ff_curve(sophies_data, title=" - sophie")
+    #make_ff_curve(andrews_data, title=" - andrew")
+
+    make_big_K(andrews_data, norm=0.0001,Vwell=5,title=' - andrew')
 
 
 if __name__ == "__main__":
