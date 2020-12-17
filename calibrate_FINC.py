@@ -38,9 +38,9 @@ def get_finc_ramp(file_path):
 
     Out: time, temp as nparrays
     """
-    finc_time = np.empty(count_lines(file_path), dtype="datetime64[us]")
-    finc_temp = np.empty(count_lines(file_path))
-    i = 0
+    # this is horrible, please change to less memory abusive method ASAP
+    finc_time = np.array([],dtype="datetime64[us]")
+    finc_temp = np.array([])
 
     for line in open(file_path):
         try:
@@ -48,11 +48,10 @@ def get_finc_ramp(file_path):
             # get datetime and reformat to np.datetime
             # https://stackabuse.com/converting-strings-to-datetime-in-python/
             dt = datetime.datetime.strptime(the_str[0], "%d-%b-%Y %H:%M:%S")
-            finc_time[i] = np.datetime64(dt)
+            finc_time = np.append(finc_time, np.datetime64(dt))
 
             # get the temp
-            finc_temp[i] = the_str[1]
-            i += 1
+            finc_temp = np.append(finc_temp, the_str[1])
         except ValueError:
             # omit metadata lines
             pass
@@ -69,21 +68,22 @@ def get_tc_ramp(file_path):
     """
 
     # initialize time and thermocouple temps
-    tc_time = np.zeros(count_lines(file_path), dtype="datetime64[us]")
-    tc1 = np.zeros(count_lines(file_path))
-    tc2 = np.zeros_like(tc1)
-    tc3 = np.zeros_like(tc1)
-    tc4 = np.zeros_like(tc1)
-    tc5 = np.zeros_like(tc1)
-    tc6 = np.zeros_like(tc1)
-    tc7 = np.zeros_like(tc1)
-    tc8 = np.zeros_like(tc1)
-    tc9 = np.zeros_like(tc1)
-    tc10 = np.zeros_like(tc1)
-    tc11 = np.zeros_like(tc1)
-    tc12 = np.zeros_like(tc1)
+    tc_time = np.array([], dtype="datetime64[us]")
+    tc1 = np.array([])
+    tc2 = np.array([])
+    tc3 = np.array([])
+    tc4 = np.array([])
+    tc5 = np.array([])
+    tc6 = np.array([])
+    tc7 = np.array([])
+    tc8 = np.array([])
+    tc9 = np.array([])
+    tc10 = np.array([])
+    tc11 = np.array([])
+    tc12 = np.array([])
 
-    print(len(tc_time))
+
+    
 
     i = 0
     for line in open(file_path):
@@ -92,21 +92,21 @@ def get_tc_ramp(file_path):
             the_str = line.split(",")
             raw_date = the_str[1] + " " + the_str[2]
             dt = datetime.datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S")
-            tc_time[i] = np.datetime64(dt)
+            tc_time = np.append(tc_time, np.datetime64(dt))
 
             # get 12 thermocouple temperatures
-            tc1[i] = float(the_str[3])
-            tc2[i] = float(the_str[5])
-            tc3[i] = float(the_str[7])
-            tc4[i] = float(the_str[9])
-            tc5[i] = float(the_str[11])
-            tc6[i] = float(the_str[13])
-            tc7[i] = float(the_str[15])
-            tc8[i] = float(the_str[17])
-            tc9[i] = float(the_str[19])
-            tc10[i] = float(the_str[21])
-            tc11[i] = float(the_str[23])
-            tc12[i] = float(the_str[25])
+            tc1 = np.append(tc1,float(the_str[3]))
+            tc2 = np.append(tc2,float(the_str[5]))
+            tc3 = np.append(tc3,float(the_str[7]))
+            tc4 = np.append(tc4,float(the_str[9]))
+            tc5 = np.append(tc5,float(the_str[11]))
+            tc6 = np.append(tc6,float(the_str[13]))
+            tc7 = np.append(tc7,float(the_str[15]))
+            tc8 = np.append(tc8,float(the_str[17]))
+            tc9 = np.append(tc9,float(the_str[19]))
+            tc10 = np.append(tc10,float(the_str[21]))
+            tc11 = np.append(tc11, float(the_str[23]))
+            tc12 = np.append(tc12, float(the_str[25]))
 
             i += 1
 
@@ -131,24 +131,28 @@ def get_tc_ramp(file_path):
     }
     return tc_time, tc_dict
 
+
 # this will become main()
 # ====================================================================================
 
 # finc data
 finc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/ramp.txt"
 # thermocouple data
-tc_ramp_path = "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/TMB01001_fixed.csv"
+tc_ramp_path = (
+    "C:/Users/Owner/UBC_F2020/FINC/outputs/20201209_calibrate/TMB01001_fixed.csv"
+)
 
 
-'''
+
 finc_time, finc_temp = get_finc_ramp(finc_ramp_path)
 cal_time, cal_temp = get_tc_ramp(tc_ramp_path)
 
-print(cal_time)
-plt.plot(finc_time, finc_temp, label='lauda')
+fig, ax = plt.subplots(figsize=(10,10))
+ax.plot(finc_time, finc_temp, label='lauda')
+#plt.gca().invert_yaxis()
 for key in cal_temp:
-    plt.plot(cal_time, cal_temp[key], label=key)
+    ax.plot(cal_time, cal_temp[key], label=key)
 plt.legend()
-'''
+
 
 # %%
