@@ -314,7 +314,7 @@ def main():
         dat = np.sort(annas_data[key], axis=0)
 
         K = -np.log(1 - ind) / (anna_norm * anna_vol * 10 ** -6)  # Vali 2018 eq. 4
-        ax.plot(dat, K, label=key)
+        ax.scatter(dat, K, label=key,color='orange')
     
     # andrew
     for key in andrews_data.keys():
@@ -323,7 +323,7 @@ def main():
         dat = np.sort(andrews_data[key], axis=0)
 
         K = -np.log(1 - ind) / (andrew_norm * andrew_vol * 10 ** -6)  # Vali 2018 eq. 4
-        ax.plot(dat, K, label=key)
+        ax.scatter(dat, K, label=key,color="b")
 
     # jon
     for key in jons_data.keys():
@@ -332,7 +332,7 @@ def main():
         dat = np.sort(jons_data[key], axis=0)
 
         K = -np.log(1 - ind) / (jon_norm * jon_vol * 10 ** -6)  # Vali 2018 eq. 4
-        ax.plot(dat, K, label=key)
+        ax.scatter(dat, K, label=key,color='g')
 
     # sophie
     for key in sophies_data.keys():
@@ -341,7 +341,7 @@ def main():
         dat = np.sort(sophies_data[key], axis=0)
 
         K = -np.log(1 - ind) / (sophie_norm * sophie_vol * 10 ** -6)  # Vali 2018 eq. 4
-        ax.plot(dat, K, label=key)
+        ax.scatter(dat, K, label=key,color='r')
 
     ax.legend()
     ax.set_yscale("log")
