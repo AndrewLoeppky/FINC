@@ -81,7 +81,6 @@ function [] = autowell(foldername,varargin)
 
 % addapted from well_compare function by R.O.D Jan 2018
 
-
 % + magic_args="parameters"
 subsampling = .5; % subsampling factor (rescales image to improve processing time)
 skip = 0; % number of images skipped for analysis
@@ -143,6 +142,8 @@ manual = p.Results.manual;
 nWells = nTrays*traySize; % number of wells being analyzed
 
 % + magic_args="Identify the well location (read in the first image) and retrieve the well change over the run"
+
+
 cd(foldername) % must be in the correct folder or use the whole path here i.e. cd(strcat('D\DropFreezing\BaselTest\',foldername))
 dirstruct = dir('*.jpg'); % find info about .jpg's in folder
 pcrnmAll = char(extractfield(dirstruct,'name')'); % extract name information from structure & transform for correct format & convert to char vector
